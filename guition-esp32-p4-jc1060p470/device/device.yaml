@@ -81,8 +81,8 @@ i2c:
     sda: GPIO07
     scl: GPIO08
     frequency: 400kHz
-    sda_pullup_enabled: False
-    scl_pullup_enabled: False
+    sda_pullup_enabled: True
+    scl_pullup_enabled: True
 
 i2c_device:
   - id: i2cdev1
