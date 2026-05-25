@@ -1,8 +1,8 @@
 # ESP32-P4-JC1060P470
 substitutions:
-  name: "your-device-name"
-  friendly_name: "Your Room Sensor"
-  room: "Your Room"
+  name: "panel-7-cali"
+  friendly_name: "Panel 7 cali Pokoj dzienny"
+  room: "Pokoj dzienny"
 
 # Wifi Setup
 wifi:
