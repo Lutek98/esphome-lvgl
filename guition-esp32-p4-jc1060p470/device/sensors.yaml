@@ -27,7 +27,8 @@ sensor:
     id: office_blind_position
     attribute: current_position
 
-  # Centauri Carbon Print Progress
+  # Print progress
+  # TODO: wstaw ID swojej encji postepu druku (obecna to encja autora i nie istnieje u Ciebie)
   - platform: homeassistant
     entity_id: sensor.centauri_carbon_percent_complete_helper
     id: centauri_carbon_percent
@@ -104,7 +105,7 @@ binary_sensor:
   # 3d Printer
   - platform: homeassistant
     id: office_3d_printer_power
-    entity_id: switch.office_3d_printer_power
+    entity_id: switch.pokoj_dzienny_drukarka_3d_gniazdko
     trigger_on_initial_state: true
     on_state:
       then:
@@ -244,3 +245,15 @@ binary_sensor:
           id: network_rack_button
           state:
             checked: !lambda return x;
+
+
+text_sensor:
+
+  # Printer air quality (text_sensor works for both numeric and text states)
+  - platform: homeassistant
+    entity_id: sensor.salon_czujnik_powietrza_drukarka_3d_air_quality
+    id: printer_air_quality
+    on_value:
+      - lvgl.label.update:
+          id: air_quality_label
+          text: !lambda 'return x.c_str();'
