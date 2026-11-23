@@ -22,6 +22,11 @@ font:
       "\U000F089E",  # mdi-battery
       "\U000F07DE",  # mdi-filament
       "\U000F0317",  # mdi-lan
+      "\U000F03E4",  # mdi-pause
+      "\U000F040A",  # mdi-play
+      "\U000F04DB",  # mdi-stop
+      "\U000F0769",  # mdi-ceiling-light
+      "\U000F11FD",  # mdi-mirror
       ]
 
 # Map icons to names
@@ -42,4 +47,9 @@ substitutions:
   battery:        "\U000F089E"
   filament:       "\U000F07DE"
   lan:            "\U000F0317"
+  print_pause:    "\U000F03E4"
+  print_resume:   "\U000F040A"
+  print_stop:     "\U000F04DB"
+  ceiling_light:  "\U000F0769"
+  mirror:         "\U000F11FD"
 
