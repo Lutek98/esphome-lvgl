@@ -266,12 +266,12 @@ lvgl:
                         pad_bottom: 6
               - label:
                   align: bottom_left
-                  text: "Printer"
+                  text: "Drukarka"
             on_click:
               - homeassistant.service:
                   service: switch.toggle
                   data:
-                    entity_id: switch.office_3d_printer_power
+                    entity_id: switch.pokoj_dzienny_drukarka_3d_gniazdko
 
         # Filament Heater
         - button: 
@@ -410,3 +410,64 @@ lvgl:
                   service: light.toggle
                   data:
                     entity_id: light.office_network_rack
+
+        # Printer - pause print
+        - button:
+            height: $button_height
+            width: $button_width
+            styles: control
+            widgets:
+              - label:
+                  align: center
+                  text: "Wstrzymaj"
+            on_click:
+              - homeassistant.service:
+                  service: button.press
+                  data:
+                    entity_id: button.pokoj_dzienny_p1s_wstrzymaj_drukowanie
+
+        # Printer - resume print
+        - button:
+            height: $button_height
+            width: $button_width
+            styles: control
+            widgets:
+              - label:
+                  align: center
+                  text: "Wznow"
+            on_click:
+              - homeassistant.service:
+                  service: button.press
+                  data:
+                    entity_id: button.pokoj_dzienny_p1s_wznow_drukowanie
+
+        # Printer - stop print (LONG PRESS only, to avoid accidental cancel)
+        - button:
+            height: $button_height
+            width: $button_width
+            styles: control
+            widgets:
+              - label:
+                  align: center
+                  text: "Stop druku\n(przytrzymaj)"
+                  text_align: center
+            on_long_press:
+              - homeassistant.service:
+                  service: button.press
+                  data:
+                    entity_id: button.pokoj_dzienny_p1s_zatrzymaj_drukowanie
+
+        # Printer - air quality (display only)
+        - button:
+            height: $button_height
+            width: $button_width
+            styles: control
+            clickable: false
+            widgets:
+              - label:
+                  align: top_left
+                  id: air_quality_label
+                  text: "--"
+              - label:
+                  align: bottom_left
+                  text: "Powietrze"
