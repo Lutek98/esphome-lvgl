@@ -79,3 +79,13 @@ text_sensor:
       - lvgl.label.update:
           id: air_quality_label
           text: !lambda 'return x.c_str();'
+
+  # Vacuum state (highlights the tile while cleaning)
+  - platform: homeassistant
+    entity_id: vacuum.mova_e30_ultra
+    id: vacuum_state
+    on_value:
+      - lvgl.widget.update:
+          id: vacuum_button
+          state:
+            checked: !lambda 'return x == "cleaning";'
