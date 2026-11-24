@@ -231,3 +231,27 @@ lvgl:
               - label:
                   align: bottom_left
                   text: "Powietrze"
+
+        # Vacuum - start cleaning (does nothing while it is already cleaning)
+        - button:
+            height: $button_height
+            width: $button_width
+            id: vacuum_button
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $vacuum
+              - label:
+                  align: bottom_left
+                  text: "Odkurzacz"
+            on_click:
+              - if:
+                  condition:
+                    lambda: 'return id(vacuum_state).state != "cleaning";'
+                  then:
+                    - homeassistant.service:
+                        service: vacuum.start
+                        data:
+                          entity_id: vacuum.mova_e30_ultra
