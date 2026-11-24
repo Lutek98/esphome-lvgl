@@ -255,3 +255,23 @@ lvgl:
                         service: vacuum.start
                         data:
                           entity_id: vacuum.mova_e30_ultra
+
+        # Vacuum - pause cleaning
+        - button:
+            height: $button_height
+            width: $button_width
+            id: vacuum_pause_button
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $print_pause
+              - label:
+                  align: bottom_left
+                  text: "Pauza"
+            on_click:
+              - homeassistant.service:
+                  service: vacuum.pause
+                  data:
+                    entity_id: vacuum.mova_e30_ultra
