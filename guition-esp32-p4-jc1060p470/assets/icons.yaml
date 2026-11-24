@@ -27,6 +27,7 @@ font:
       "\U000F04DB",  # mdi-stop
       "\U000F0769",  # mdi-ceiling-light
       "\U000F11FD",  # mdi-mirror
+      "\U000F070D",  # mdi-robot-vacuum
       ]
 
 # Map icons to names
@@ -52,4 +53,5 @@ substitutions:
   print_stop:     "\U000F04DB"
   ceiling_light:  "\U000F0769"
   mirror:         "\U000F11FD"
+  vacuum:         "\U000F070D"
 
