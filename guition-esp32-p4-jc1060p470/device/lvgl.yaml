@@ -1,3 +1,11 @@
+# ---------------------------------------------------------------------------
+# WPISZ ID POKOJU "Korytarz" z aplikacji/integracji odkurzacza (liczba).
+# Znajdziesz go w HA: Narzedzia deweloperskie -> Stany -> vacuum.mova_e30_ultra
+# -> atrybut "rooms". Dopoki jest 0, przycisk Korytarz nic nie zrobi.
+# ---------------------------------------------------------------------------
+substitutions:
+  korytarz_segment_id: "6"
+
 lvgl:
   displays: my_display
   byte_order: little_endian
@@ -32,15 +40,15 @@ lvgl:
       pad_right: 5
       
       widgets:
-      
+
         # ---------- Column 1: lights ----------
 
         # Kitchen LED
         - button:
+            id: kitchen_led_button
             height: $button_height
             width: $button_width
             checkable: true
-            id: kitchen_led_button
             styles: control
             widgets:
               - label:
@@ -58,10 +66,10 @@ lvgl:
 
         # Bathroom mirror light
         - button:
+            id: bathroom_mirror_button
             height: $button_height
             width: $button_width
             checkable: true
-            id: bathroom_mirror_button
             styles: control
             widgets:
               - label:
@@ -70,7 +78,7 @@ lvgl:
                   text: $mirror
               - label:
                   align: bottom_left
-                  text: "Lazienka lustro"
+                  text: "Łazienka lustro"
             on_click:
               - homeassistant.service:
                   service: light.toggle
@@ -79,10 +87,10 @@ lvgl:
 
         # Bathroom ceiling light
         - button:
+            id: bathroom_ceiling_button
             height: $button_height
             width: $button_width
             checkable: true
-            id: bathroom_ceiling_button
             styles: control
             widgets:
               - label:
@@ -91,7 +99,7 @@ lvgl:
                   text: $ceiling_light
               - label:
                   align: bottom_left
-                  text: "Lazienka sufit"
+                  text: "Łazienka sufit"
             on_click:
               - homeassistant.service:
                   service: light.toggle
@@ -109,7 +117,7 @@ lvgl:
 
         # ---------- Column 2: 3D printer ----------
 
-        # 3d Printer
+        # 3D printer power (shows print progress while it is on)
         - button: 
             height: $button_height
             width: $button_width
@@ -158,8 +166,9 @@ lvgl:
                   data:
                     entity_id: switch.pokoj_dzienny_drukarka_3d_gniazdko
 
-        # Printer - pause print
+        # Open printer page
         - button:
+            id: printer_open_button
             height: $button_height
             width: $button_width
             styles: control
@@ -167,62 +176,19 @@ lvgl:
               - label:
                   text_font: $icon_font
                   align: top_left
-                  text: $print_pause
+                  text: $icon_camera
               - label:
                   align: bottom_left
-                  text: "Wstrzymaj"
+                  text: "Podgląd druku"
             on_click:
-              - homeassistant.service:
-                  service: button.press
-                  data:
-                    entity_id: button.pokoj_dzienny_p1s_wstrzymaj_drukowanie
-
-        # Printer - resume print
-        - button:
-            height: $button_height
-            width: $button_width
-            styles: control
-            widgets:
-              - label:
-                  text_font: $icon_font
-                  align: top_left
-                  text: $print_resume
-              - label:
-                  align: bottom_left
-                  text: "Wznow"
-            on_click:
-              - homeassistant.service:
-                  service: button.press
-                  data:
-                    entity_id: button.pokoj_dzienny_p1s_wznow_drukowanie
-
-        # Printer - stop print (LONG PRESS only, to avoid accidental cancel)
-        - button:
-            height: $button_height
-            width: $button_width
-            styles: control
-            widgets:
-              - label:
-                  text_font: $icon_font
-                  align: top_left
-                  text: $print_stop
-              - label:
-                  align: bottom_left
-                  text: "Stop druku\n(przytrzymaj)"
-            on_long_press:
-              - homeassistant.service:
-                  service: button.press
-                  data:
-                    entity_id: button.pokoj_dzienny_p1s_zatrzymaj_drukowanie
-
-        # ---------- Column 3: printer air quality ----------
+              - lvgl.page.show: printer_page
 
         # Printer air quality (display only)
         - button:
             height: $button_height
             width: $button_width
-            styles: control
             clickable: false
+            styles: control
             widgets:
               - label:
                   align: top_left
@@ -232,11 +198,22 @@ lvgl:
                   align: bottom_left
                   text: "Powietrze"
 
-        # Vacuum - start cleaning (does nothing while it is already cleaning)
-        - button:
+        # Empty slot (starts a new column)
+        - obj:
             height: $button_height
             width: $button_width
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            clickable: false
+
+        # ---------- Column 3: vacuum ----------
+
+        # Vacuum - start cleaning (ignored while already cleaning)
+        - button:
             id: vacuum_button
+            height: $button_height
+            width: $button_width
             styles: control
             widgets:
               - label:
@@ -256,11 +233,11 @@ lvgl:
                         data:
                           entity_id: vacuum.mova_e30_ultra
 
-        # Vacuum - pause cleaning
+        # Vacuum - pause
         - button:
+            id: vacuum_pause_button
             height: $button_height
             width: $button_width
-            id: vacuum_pause_button
             styles: control
             widgets:
               - label:
@@ -275,3 +252,531 @@ lvgl:
                   service: vacuum.pause
                   data:
                     entity_id: vacuum.mova_e30_ultra
+
+        # Open vacuum page
+        - button:
+            id: vacuum_more_button
+            height: $button_height
+            width: $button_width
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $icon_more
+              - label:
+                  id: vacuum_more_label
+                  align: bottom_left
+                  text: "Więcej"
+            on_click:
+              - lvgl.page.show: vacuum_page
+
+    - id: printer_page
+      bg_color: Black
+      bg_opa: cover
+      pad_all: 0
+      scrollable: false
+      widgets:
+
+        # Camera placeholder (visible until the first picture arrives)
+        - obj:
+            x: 5
+            y: 42
+            width: 600
+            height: 338
+            bg_color: $button_control_color
+            bg_opa: cover
+            radius: $radius
+            border_width: 0
+            pad_all: 0
+            scrollable: false
+            clickable: false
+            widgets:
+              - label:
+                  align: center
+                  text: "Ładowanie obrazu z kamery..."
+
+        # Camera picture (filled by addon/camera.yaml)
+        - image:
+            id: printer_camera_view
+            src: printer_camera_image
+            x: 5
+            y: 42
+
+        # Print progress
+        - button:
+            x: 615
+            y: 42
+            height: $button_height
+            width: 197
+            clickable: false
+            styles: control
+            widgets:
+              - obj:
+                  align: top_left
+                  height: SIZE_CONTENT
+                  width: SIZE_CONTENT
+                  clickable: false
+                  layout:
+                    type: flex
+                    flex_flow: row
+                    flex_align_cross: end
+                  bg_opa: TRANSP
+                  border_width: 0
+                  pad_all: 0
+                  widgets:
+                    - label:
+                        text_font: statistics_font
+                        text_color: $button_text_color
+                        id: page_progress_label
+                        text: "--"
+                    - label:
+                        text_font: label_font
+                        text_color: $button_text_color
+                        text: "%"
+                        pad_bottom: 6
+              - label:
+                  align: bottom_left
+                  text: "Postęp druku"
+
+        # Print end time
+        - button:
+            x: 822
+            y: 42
+            height: $button_height
+            width: 197
+            clickable: false
+            styles: control
+            widgets:
+              - label:
+                  text_font: statistics_font
+                  text_color: $button_text_color
+                  align: top_left
+                  id: end_time_label
+                  text: "--:--"
+              - label:
+                  align: bottom_left
+                  id: end_time_caption
+                  text: "Koniec druku"
+
+        # Air quality (display only)
+        - button:
+            x: 615
+            y: 182
+            height: $button_height
+            width: 197
+            clickable: false
+            styles: control
+            widgets:
+              - label:
+                  align: top_left
+                  id: page_air_quality_label
+                  text: "--"
+              - label:
+                  align: bottom_left
+                  text: "Powietrze"
+
+        # Printer power
+        - button:
+            id: page_power_button
+            x: 822
+            y: 182
+            height: $button_height
+            width: 197
+            checkable: true
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $printer
+              - label:
+                  align: bottom_left
+                  text: "Zasilanie"
+            on_click:
+              - homeassistant.service:
+                  service: switch.toggle
+                  data:
+                    entity_id: switch.pokoj_dzienny_drukarka_3d_gniazdko
+
+        # Pause print
+        - button:
+            x: 615
+            y: 322
+            height: $button_height
+            width: 197
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $print_pause
+              - label:
+                  align: bottom_left
+                  text: "Wstrzymaj"
+            on_click:
+              - homeassistant.service:
+                  service: button.press
+                  data:
+                    entity_id: button.pokoj_dzienny_p1s_wstrzymaj_drukowanie
+
+        # Resume print
+        - button:
+            x: 822
+            y: 322
+            height: $button_height
+            width: 197
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $print_resume
+              - label:
+                  align: bottom_left
+                  text: "Wznów"
+            on_click:
+              - homeassistant.service:
+                  service: button.press
+                  data:
+                    entity_id: button.pokoj_dzienny_p1s_wznow_drukowanie
+
+        # Stop print (LONG PRESS only)
+        - button:
+            x: 615
+            y: 462
+            height: $button_height
+            width: 197
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $print_stop
+              - label:
+                  align: bottom_left
+                  text: "Stop druku\n(przytrzymaj)"
+            on_long_press:
+              - homeassistant.service:
+                  service: button.press
+                  data:
+                    entity_id: button.pokoj_dzienny_p1s_zatrzymaj_drukowanie
+
+        # Back
+        - button:
+            x: 5
+            y: 462
+            height: $button_height
+            width: $button_width
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $icon_back
+              - label:
+                  align: bottom_left
+                  text: "Wstecz"
+            on_click:
+              - lvgl.page.show: main_page
+
+    - id: vacuum_page
+      bg_color: Black
+      bg_opa: cover
+      pad_all: 0
+      scrollable: false
+      widgets:
+
+        # Start cleaning
+        - button:
+            id: vacuum_page_start_button
+            x: 5
+            y: 42
+            height: $button_height
+            width: $button_width
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $vacuum
+              - label:
+                  align: bottom_left
+                  text: "Start"
+            on_click:
+              - if:
+                  condition:
+                    lambda: 'return id(vacuum_state).state != "cleaning";'
+                  then:
+                    - homeassistant.service:
+                        service: vacuum.start
+                        data:
+                          entity_id: vacuum.mova_e30_ultra
+
+        # Pause
+        - button:
+            x: 215
+            y: 42
+            height: $button_height
+            width: $button_width
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $print_pause
+              - label:
+                  align: bottom_left
+                  text: "Pauza"
+            on_click:
+              - homeassistant.service:
+                  service: vacuum.pause
+                  data:
+                    entity_id: vacuum.mova_e30_ultra
+
+        # Return to base
+        - button:
+            x: 425
+            y: 42
+            height: $button_height
+            width: $button_width
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $icon_home
+              - label:
+                  align: bottom_left
+                  text: "Do bazy"
+            on_click:
+              - homeassistant.service:
+                  service: vacuum.return_to_base
+                  data:
+                    entity_id: vacuum.mova_e30_ultra
+
+        # Clean room: Korytarz
+        - button:
+            x: 5
+            y: 182
+            height: $button_height
+            width: $button_width
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $icon_door
+              - label:
+                  align: bottom_left
+                  text: "Korytarz"
+            on_click:
+              - if:
+                  condition:
+                    lambda: 'return std::string("$korytarz_segment_id") != "0";'
+                  then:
+                    - homeassistant.service:
+                        service: dreame_vacuum.vacuum_clean_segment
+                        data:
+                          entity_id: vacuum.mova_e30_ultra
+                          segments: "$korytarz_segment_id"
+
+        # Locate (vacuum makes a sound)
+        - button:
+            x: 215
+            y: 182
+            height: $button_height
+            width: $button_width
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $icon_locate
+              - label:
+                  align: bottom_left
+                  text: "Gdzie jesteś?"
+            on_click:
+              - homeassistant.service:
+                  service: vacuum.locate
+                  data:
+                    entity_id: vacuum.mova_e30_ultra
+
+        # Clear all notifications
+        - button:
+            x: 425
+            y: 182
+            height: $button_height
+            width: $button_width
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $icon_clear
+              - label:
+                  align: bottom_left
+                  text: "Wyczyść powiad."
+            on_click:
+              - script.execute: clear_all_notifications
+
+        # Back
+        - button:
+            x: 5
+            y: 322
+            height: $button_height
+            width: $button_width
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $icon_back
+              - label:
+                  align: bottom_left
+                  text: "Wstecz"
+            on_click:
+              - lvgl.page.show: main_page
+
+        # Vacuum state (display only)
+        - button:
+            x: 215
+            y: 322
+            height: $button_height
+            width: $button_width
+            clickable: false
+            styles: control
+            widgets:
+              - label:
+                  align: top_left
+                  id: vacuum_state_label
+                  text: "--"
+              - label:
+                  align: bottom_left
+                  text: "Stan"
+
+        # Notifications header
+        - label:
+            x: 640
+            y: 44
+            text: "Powiadomienia (dotknij = usuń)"
+            text_color: $button_text_color
+
+        # Shown when there are no notifications
+        - label:
+            id: notif_empty_label
+            x: 700
+            y: 300
+            text: "Brak powiadomień"
+            text_color: 0x808080
+
+        # Notification row 0
+        - button:
+            id: notif_row_0
+            x: 640
+            y: 78
+            width: 379
+            height: 96
+            hidden: true
+            styles: control
+            pad_all: 8
+            widgets:
+              - label:
+                  id: notif_label_0
+                  align: left_mid
+                  width: 363
+                  long_mode: WRAP
+                  text: ""
+            on_click:
+              - script.execute:
+                  id: dismiss_notification
+                  idx: 0
+
+        # Notification row 1
+        - button:
+            id: notif_row_1
+            x: 640
+            y: 182
+            width: 379
+            height: 96
+            hidden: true
+            styles: control
+            pad_all: 8
+            widgets:
+              - label:
+                  id: notif_label_1
+                  align: left_mid
+                  width: 363
+                  long_mode: WRAP
+                  text: ""
+            on_click:
+              - script.execute:
+                  id: dismiss_notification
+                  idx: 1
+
+        # Notification row 2
+        - button:
+            id: notif_row_2
+            x: 640
+            y: 286
+            width: 379
+            height: 96
+            hidden: true
+            styles: control
+            pad_all: 8
+            widgets:
+              - label:
+                  id: notif_label_2
+                  align: left_mid
+                  width: 363
+                  long_mode: WRAP
+                  text: ""
+            on_click:
+              - script.execute:
+                  id: dismiss_notification
+                  idx: 2
+
+        # Notification row 3
+        - button:
+            id: notif_row_3
+            x: 640
+            y: 390
+            width: 379
+            height: 96
+            hidden: true
+            styles: control
+            pad_all: 8
+            widgets:
+              - label:
+                  id: notif_label_3
+                  align: left_mid
+                  width: 363
+                  long_mode: WRAP
+                  text: ""
+            on_click:
+              - script.execute:
+                  id: dismiss_notification
+                  idx: 3
+
+        # Notification row 4
+        - button:
+            id: notif_row_4
+            x: 640
+            y: 494
+            width: 379
+            height: 96
+            hidden: true
+            styles: control
+            pad_all: 8
+            widgets:
+              - label:
+                  id: notif_label_4
+                  align: left_mid
+                  width: 363
+                  long_mode: WRAP
+                  text: ""
+            on_click:
+              - script.execute:
+                  id: dismiss_notification
+                  idx: 4
+
