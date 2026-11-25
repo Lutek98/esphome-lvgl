@@ -1,0 +1,189 @@
+# Vacuum notifications on the panel (list of the last 5, tap one to dismiss it in Home Assistant).
+# Needs the Home Assistant automation from "ha_automation_powiadomienia.yaml".
+globals:
+  - id: notif_ids
+    type: std::vector<std::string>
+  - id: notif_texts
+    type: std::vector<std::string>
+
+api:
+  actions:
+    # Called by Home Assistant when a Dreame notification is added or updated
+    - action: vacuum_notify
+      variables:
+        nid: string
+        msg: string
+      then:
+        - lambda: |-
+            std::string m = msg;
+            for (auto &c : m) {
+              if (c == '\n' || c == '\r' || c == '*' || c == '#' || c == '`') c = ' ';
+            }
+            if (m.size() > 84) m = m.substr(0, 81) + "...";
+            bool found = false;
+            for (size_t i = 0; i < id(notif_ids).size(); i++) {
+              if (id(notif_ids)[i] == nid) {
+                id(notif_texts)[i] = m;
+                found = true;
+                break;
+              }
+            }
+            if (!found) {
+              id(notif_ids).insert(id(notif_ids).begin(), nid);
+              id(notif_texts).insert(id(notif_texts).begin(), m);
+              if (id(notif_ids).size() > 5) {
+                id(notif_ids).pop_back();
+                id(notif_texts).pop_back();
+              }
+            }
+        - script.execute: render_vacuum_notifications
+
+    # Called by Home Assistant when a notification is removed there
+    - action: vacuum_notify_remove
+      variables:
+        nid: string
+      then:
+        - lambda: |-
+            for (size_t i = 0; i < id(notif_ids).size(); i++) {
+              if (id(notif_ids)[i] == nid) {
+                id(notif_ids).erase(id(notif_ids).begin() + i);
+                id(notif_texts).erase(id(notif_texts).begin() + i);
+                break;
+              }
+            }
+        - script.execute: render_vacuum_notifications
+
+script:
+  # Redraw the notification rows from the stored list
+  - id: render_vacuum_notifications
+    then:
+      - lvgl.label.update:
+          id: notif_label_0
+          text: !lambda 'return id(notif_texts).size() > 0 ? id(notif_texts)[0] : std::string();'
+      - if:
+          condition:
+            lambda: 'return id(notif_texts).size() > 0;'
+          then:
+            - lvgl.widget.show: notif_row_0
+          else:
+            - lvgl.widget.hide: notif_row_0
+      - lvgl.label.update:
+          id: notif_label_1
+          text: !lambda 'return id(notif_texts).size() > 1 ? id(notif_texts)[1] : std::string();'
+      - if:
+          condition:
+            lambda: 'return id(notif_texts).size() > 1;'
+          then:
+            - lvgl.widget.show: notif_row_1
+          else:
+            - lvgl.widget.hide: notif_row_1
+      - lvgl.label.update:
+          id: notif_label_2
+          text: !lambda 'return id(notif_texts).size() > 2 ? id(notif_texts)[2] : std::string();'
+      - if:
+          condition:
+            lambda: 'return id(notif_texts).size() > 2;'
+          then:
+            - lvgl.widget.show: notif_row_2
+          else:
+            - lvgl.widget.hide: notif_row_2
+      - lvgl.label.update:
+          id: notif_label_3
+          text: !lambda 'return id(notif_texts).size() > 3 ? id(notif_texts)[3] : std::string();'
+      - if:
+          condition:
+            lambda: 'return id(notif_texts).size() > 3;'
+          then:
+            - lvgl.widget.show: notif_row_3
+          else:
+            - lvgl.widget.hide: notif_row_3
+      - lvgl.label.update:
+          id: notif_label_4
+          text: !lambda 'return id(notif_texts).size() > 4 ? id(notif_texts)[4] : std::string();'
+      - if:
+          condition:
+            lambda: 'return id(notif_texts).size() > 4;'
+          then:
+            - lvgl.widget.show: notif_row_4
+          else:
+            - lvgl.widget.hide: notif_row_4
+      - if:
+          condition:
+            lambda: 'return id(notif_texts).empty();'
+          then:
+            - lvgl.widget.show: notif_empty_label
+          else:
+            - lvgl.widget.hide: notif_empty_label
+      - lvgl.label.update:
+          id: vacuum_more_label
+          text: !lambda |-
+            static char buf[24];
+            if (id(notif_texts).empty()) return "Więcej";
+            snprintf(buf, sizeof(buf), "Więcej (%d)", (int) id(notif_texts).size());
+            return buf;
+
+  # Tap on a row: remove it from the panel AND dismiss it in Home Assistant
+  - id: dismiss_notification
+    parameters:
+      idx: int
+    then:
+      - if:
+          condition:
+            lambda: 'return idx >= 0 && idx < (int) id(notif_ids).size();'
+          then:
+            - homeassistant.service:
+                service: persistent_notification.dismiss
+                data:
+                  notification_id: !lambda 'return id(notif_ids)[idx];'
+            - lambda: |-
+                id(notif_ids).erase(id(notif_ids).begin() + idx);
+                id(notif_texts).erase(id(notif_texts).begin() + idx);
+            - script.execute: render_vacuum_notifications
+
+  # "Wyczyść powiad." tile
+  - id: clear_all_notifications
+    then:
+      - if:
+          condition:
+            lambda: 'return id(notif_ids).size() > 0;'
+          then:
+            - homeassistant.service:
+                service: persistent_notification.dismiss
+                data:
+                  notification_id: !lambda 'return id(notif_ids)[0];'
+      - if:
+          condition:
+            lambda: 'return id(notif_ids).size() > 1;'
+          then:
+            - homeassistant.service:
+                service: persistent_notification.dismiss
+                data:
+                  notification_id: !lambda 'return id(notif_ids)[1];'
+      - if:
+          condition:
+            lambda: 'return id(notif_ids).size() > 2;'
+          then:
+            - homeassistant.service:
+                service: persistent_notification.dismiss
+                data:
+                  notification_id: !lambda 'return id(notif_ids)[2];'
+      - if:
+          condition:
+            lambda: 'return id(notif_ids).size() > 3;'
+          then:
+            - homeassistant.service:
+                service: persistent_notification.dismiss
+                data:
+                  notification_id: !lambda 'return id(notif_ids)[3];'
+      - if:
+          condition:
+            lambda: 'return id(notif_ids).size() > 4;'
+          then:
+            - homeassistant.service:
+                service: persistent_notification.dismiss
+                data:
+                  notification_id: !lambda 'return id(notif_ids)[4];'
+      - lambda: |-
+          id(notif_ids).clear();
+          id(notif_texts).clear();
+      - script.execute: render_vacuum_notifications

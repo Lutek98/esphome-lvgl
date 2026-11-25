@@ -1,0 +1,32 @@
+# Live picture from the printer camera (refreshed every few seconds ONLY while the Drukarka page is open).
+# Needs two entries in ESPHome Secrets (see instructions):
+#   ha_camera_url:   "http://IP_HOME_ASSISTANT:8123/api/camera_proxy/camera.pokoj_dzienny_p1s_kamera"
+#   ha_bearer_token: "Bearer TWOJ_DLUGOTERMINOWY_TOKEN"
+http_request:
+  timeout: 10s
+  buffer_size_rx: 2048
+  buffer_size_tx: 2048
+
+image:
+  - platform: online_image
+    id: printer_camera_image
+    url: !secret ha_camera_url
+    request_headers:
+      Authorization: !secret ha_bearer_token
+    format: JPEG
+    type: RGB565
+    resize: 600x338
+    update_interval: never
+    on_download_finished:
+      - lvgl.image.update:
+          id: printer_camera_view
+          src: printer_camera_image
+
+interval:
+  - interval: 4s
+    then:
+      - if:
+          condition:
+            lvgl.page.is_showing: printer_page
+          then:
+            - component.update: printer_camera_image
