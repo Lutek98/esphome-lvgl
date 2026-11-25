@@ -293,6 +293,7 @@ lvgl:
             clickable: false
             widgets:
               - label:
+                  id: camera_status_label
                   align: center
                   text: "Ładowanie obrazu z kamery..."
 
@@ -302,6 +303,7 @@ lvgl:
             src: printer_camera_image
             x: 5
             y: 42
+            hidden: true
 
         # Print progress
         - button:
