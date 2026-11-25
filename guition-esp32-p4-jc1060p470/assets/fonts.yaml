@@ -5,10 +5,12 @@ font:
     size: 48
     bpp: 4
 
+  # label_font also draws all button captions - includes Polish characters
   - file: "gfonts://Roboto"
     id: label_font
     size: 22
     bpp: 4
+    glyphs: ' !"#%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]_abcdefghijklmnopqrstuvwxyz°ĄĆĘŁŃÓŚŹŻąćęłńóśźż'
 
   - file: "gfonts://Roboto"
     id: clockbar_font
