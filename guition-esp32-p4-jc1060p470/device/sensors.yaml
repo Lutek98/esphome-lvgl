@@ -1,3 +1,10 @@
+globals:
+  # Print end time as unix timestamp (0 = unknown)
+  - id: printer_end_epoch
+    type: int
+    restore_value: no
+    initial_value: '0'
+
 sensor:
 
   # Print progress (Bambu Lab P1S)
@@ -7,9 +14,18 @@ sensor:
     on_value:
       - lvgl.label.update:
           id: print_progress_label
-          text:
-            format: "%.0f"
-            args: [ 'x' ]
+          text: !lambda |-
+            static char buf[8];
+            if (std::isnan(x)) return "--";
+            snprintf(buf, sizeof(buf), "%.0f", x);
+            return buf;
+      - lvgl.label.update:
+          id: page_progress_label
+          text: !lambda |-
+            static char buf[8];
+            if (std::isnan(x)) return "--";
+            snprintf(buf, sizeof(buf), "%.0f", x);
+            return buf;
 
 
 binary_sensor:
@@ -26,11 +42,16 @@ binary_sensor:
             state:
               checked: !lambda return x;
         - lvgl.widget.update:
+            id: page_power_button
+            state:
+              checked: !lambda return x;
+        - lvgl.widget.update:
             id: printer_power_icon
             hidden: !lambda return x;
         - lvgl.widget.update:
             id: print_progress_container
             hidden: !lambda return !x;
+        - script.execute: update_end_time_labels
 
   # Kitchen LED
   - platform: homeassistant
@@ -79,8 +100,39 @@ text_sensor:
       - lvgl.label.update:
           id: air_quality_label
           text: !lambda 'return x.c_str();'
+      - lvgl.label.update:
+          id: page_air_quality_label
+          text: !lambda 'return x.c_str();'
 
-  # Vacuum state (highlights the tile while cleaning)
+  # Print end time (HA timestamp sensor, e.g. 2026-11-24T21:35:12+00:00)
+  - platform: homeassistant
+    entity_id: sensor.pokoj_dzienny_p1s_czas_zakonczenia
+    id: printer_end_time
+    on_value:
+      - lambda: |-
+          id(printer_end_epoch) = 0;
+          int Y = 0, M = 0, D = 0, h = 0, m = 0, s = 0;
+          if (sscanf(x.c_str(), "%d-%d-%dT%d:%d:%d", &Y, &M, &D, &h, &m, &s) >= 5) {
+            int off = 0;
+            size_t p = x.find_last_of("+-");
+            if (p != std::string::npos && p > 10) {
+              int oh = 0, om = 0;
+              if (sscanf(x.c_str() + p + 1, "%d:%d", &oh, &om) >= 1) {
+                off = (oh * 3600 + om * 60) * (x[p] == '-' ? -1 : 1);
+              }
+            }
+            // days since 1970-01-01 (civil date algorithm)
+            int y = Y - (M <= 2 ? 1 : 0);
+            int era = (y >= 0 ? y : y - 399) / 400;
+            unsigned yoe = (unsigned) (y - era * 400);
+            unsigned doy = (153 * (M > 2 ? M - 3 : M + 9) + 2) / 5 + D - 1;
+            unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+            long long days = (long long) era * 146097LL + (long long) doe - 719468LL;
+            id(printer_end_epoch) = (int) (days * 86400LL + h * 3600 + m * 60 + s - off);
+          }
+      - script.execute: update_end_time_labels
+
+  # Vacuum state: highlight start tiles while cleaning + show state on the vacuum page
   - platform: homeassistant
     entity_id: vacuum.mova_e30_ultra
     id: vacuum_state
@@ -89,3 +141,42 @@ text_sensor:
           id: vacuum_button
           state:
             checked: !lambda 'return x == "cleaning";'
+      - lvgl.widget.update:
+          id: vacuum_page_start_button
+          state:
+            checked: !lambda 'return x == "cleaning";'
+      - lvgl.label.update:
+          id: vacuum_state_label
+          text: !lambda |-
+            if (x == "cleaning") return "Sprząta";
+            if (x == "docked") return "W bazie";
+            if (x == "returning") return "Wraca do bazy";
+            if (x == "paused") return "Wstrzymany";
+            if (x == "idle") return "Bezczynny";
+            if (x == "error") return "Błąd";
+            return x.c_str();
+
+
+script:
+
+  # Refresh the "end time" tiles (shows --:-- when the printer is off or the time is in the past)
+  - id: update_end_time_labels
+    then:
+      - lvgl.label.update:
+          id: end_time_label
+          text: !lambda |-
+            static char buf[8];
+            if (!id(printer_power).state || id(printer_end_epoch) <= 0 || id(printer_end_epoch) < (int) ::time(nullptr)) return "--:--";
+            auto t = ESPTime::from_epoch_local(id(printer_end_epoch));
+            snprintf(buf, sizeof(buf), "%02d:%02d", t.hour, t.minute);
+            return buf;
+      - lvgl.label.update:
+          id: end_time_caption
+          text: !lambda |-
+            static char buf[24];
+            if (!id(printer_power).state || id(printer_end_epoch) <= 0 || id(printer_end_epoch) < (int) ::time(nullptr)) return "Koniec druku";
+            auto t = ESPTime::from_epoch_local(id(printer_end_epoch));
+            auto now = ESPTime::from_epoch_local(::time(nullptr));
+            if (t.year == now.year && t.day_of_year == now.day_of_year) return "Koniec druku";
+            snprintf(buf, sizeof(buf), "Koniec %02d.%02d", t.day_of_month, t.month);
+            return buf;
