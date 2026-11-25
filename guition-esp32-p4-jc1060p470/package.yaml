@@ -8,3 +8,5 @@ packages:
   fonts: !include assets/fonts.yaml
   icons: !include assets/icons.yaml
   button: !include theme/button.yaml
+  camera: !include addon/camera.yaml
+  notifications: !include addon/notifications.yaml
