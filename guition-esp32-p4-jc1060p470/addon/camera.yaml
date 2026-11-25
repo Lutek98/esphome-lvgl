@@ -1,11 +1,21 @@
-# Live picture from the printer camera (refreshed every few seconds ONLY while the Drukarka page is open).
-# Needs two entries in ESPHome Secrets (see instructions):
+# Live picture from the printer camera (refreshed ONLY while the Drukarka page is open).
+# Needs two entries in ESPHome Secrets:
 #   ha_camera_url:   "http://IP_HOME_ASSISTANT:8123/api/camera_proxy/camera.pokoj_dzienny_p1s_kamera"
 #   ha_bearer_token: "Bearer TWOJ_DLUGOTERMINOWY_TOKEN"
+#
+# NOTE: ESPHome sends the request from its main loop, so the screen waits for HA's answer.
+# To keep the UI responsive, the timeout is short and after an error the next attempts
+# are skipped for ~20 s (camera_skip).
 http_request:
-  timeout: 10s
+  timeout: 5s
   buffer_size_rx: 2048
   buffer_size_tx: 2048
+
+globals:
+  - id: camera_skip
+    type: int
+    restore_value: no
+    initial_value: '0'
 
 image:
   - platform: online_image
@@ -18,15 +28,29 @@ image:
     resize: 600x338
     update_interval: never
     on_download_finished:
+      - lambda: 'id(camera_skip) = 0;'
+      - lvgl.widget.show: printer_camera_view
       - lvgl.image.update:
           id: printer_camera_view
           src: printer_camera_image
+    on_error:
+      - lambda: 'id(camera_skip) = 5;'
+      - lvgl.label.update:
+          id: camera_status_label
+          text: "Błąd obrazu - sprawdź token i adres"
 
 interval:
   - interval: 4s
     then:
       - if:
           condition:
-            lvgl.page.is_showing: printer_page
+            and:
+              - lvgl.page.is_showing: printer_page
+              - lambda: |-
+                  if (id(camera_skip) > 0) {
+                    id(camera_skip)--;
+                    return false;
+                  }
+                  return true;
           then:
             - component.update: printer_camera_image
