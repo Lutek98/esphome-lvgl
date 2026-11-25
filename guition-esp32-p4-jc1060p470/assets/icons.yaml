@@ -28,6 +28,13 @@ font:
       "\U000F0769",  # mdi-ceiling-light
       "\U000F11FD",  # mdi-mirror
       "\U000F070D",  # mdi-robot-vacuum
+      "\U000F004D",  # mdi-arrow-left
+      "\U000F01D8",  # mdi-dots-horizontal
+      "\U000F02DC",  # mdi-home
+      "\U000F034E",  # mdi-map-marker
+      "\U000F081A",  # mdi-door
+      "\U000F05E9",  # mdi-delete-sweep
+      "\U000F0100",  # mdi-camera
       ]
 
 # Map icons to names
@@ -48,10 +55,17 @@ substitutions:
   battery:        "\U000F089E"
   filament:       "\U000F07DE"
   lan:            "\U000F0317"
-  print_pause:    "\U000F03E4"
-  print_resume:   "\U000F040A"
-  print_stop:     "\U000F04DB"
-  ceiling_light:  "\U000F0769"
-  mirror:         "\U000F11FD"
-  vacuum:         "\U000F070D"
+  print_pause: "\U000F03E4"
+  print_resume: "\U000F040A"
+  print_stop: "\U000F04DB"
+  ceiling_light: "\U000F0769"
+  mirror: "\U000F11FD"
+  vacuum: "\U000F070D"
+  icon_back: "\U000F004D"
+  icon_more: "\U000F01D8"
+  icon_home: "\U000F02DC"
+  icon_locate: "\U000F034E"
+  icon_door: "\U000F081A"
+  icon_clear: "\U000F05E9"
+  icon_camera: "\U000F0100"
 
