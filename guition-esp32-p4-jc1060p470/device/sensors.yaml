@@ -27,6 +27,122 @@ sensor:
             snprintf(buf, sizeof(buf), "%.0f", x);
             return buf;
 
+  # AMS slot 1: grams left (from Spoolman via HA, see spoolman_ams.yaml)
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_1_remaining
+    id: ams_slot_1_remaining
+    on_value:
+      - lvgl.label.update:
+          id: slot1_grams
+          text: !lambda |-
+            static char buf[8];
+            if (std::isnan(x)) return "--";
+            snprintf(buf, sizeof(buf), "%.0f", x);
+            return buf;
+
+  # AMS slot 1: percent left
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_1_percent
+    id: ams_slot_1_percent
+    on_value:
+      - lvgl.label.update:
+          id: slot1_percent
+          text: !lambda |-
+            static char buf[12];
+            if (std::isnan(x)) return "--";
+            snprintf(buf, sizeof(buf), "%.0f %%", x);
+            return buf;
+      - lvgl.bar.update:
+          id: slot1_bar
+          value: !lambda 'return std::isnan(x) ? 0 : (int) x;'
+
+  # AMS slot 2: grams left (from Spoolman via HA, see spoolman_ams.yaml)
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_2_remaining
+    id: ams_slot_2_remaining
+    on_value:
+      - lvgl.label.update:
+          id: slot2_grams
+          text: !lambda |-
+            static char buf[8];
+            if (std::isnan(x)) return "--";
+            snprintf(buf, sizeof(buf), "%.0f", x);
+            return buf;
+
+  # AMS slot 2: percent left
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_2_percent
+    id: ams_slot_2_percent
+    on_value:
+      - lvgl.label.update:
+          id: slot2_percent
+          text: !lambda |-
+            static char buf[12];
+            if (std::isnan(x)) return "--";
+            snprintf(buf, sizeof(buf), "%.0f %%", x);
+            return buf;
+      - lvgl.bar.update:
+          id: slot2_bar
+          value: !lambda 'return std::isnan(x) ? 0 : (int) x;'
+
+  # AMS slot 3: grams left (from Spoolman via HA, see spoolman_ams.yaml)
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_3_remaining
+    id: ams_slot_3_remaining
+    on_value:
+      - lvgl.label.update:
+          id: slot3_grams
+          text: !lambda |-
+            static char buf[8];
+            if (std::isnan(x)) return "--";
+            snprintf(buf, sizeof(buf), "%.0f", x);
+            return buf;
+
+  # AMS slot 3: percent left
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_3_percent
+    id: ams_slot_3_percent
+    on_value:
+      - lvgl.label.update:
+          id: slot3_percent
+          text: !lambda |-
+            static char buf[12];
+            if (std::isnan(x)) return "--";
+            snprintf(buf, sizeof(buf), "%.0f %%", x);
+            return buf;
+      - lvgl.bar.update:
+          id: slot3_bar
+          value: !lambda 'return std::isnan(x) ? 0 : (int) x;'
+
+  # AMS slot 4: grams left (from Spoolman via HA, see spoolman_ams.yaml)
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_4_remaining
+    id: ams_slot_4_remaining
+    on_value:
+      - lvgl.label.update:
+          id: slot4_grams
+          text: !lambda |-
+            static char buf[8];
+            if (std::isnan(x)) return "--";
+            snprintf(buf, sizeof(buf), "%.0f", x);
+            return buf;
+
+  # AMS slot 4: percent left
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_4_percent
+    id: ams_slot_4_percent
+    on_value:
+      - lvgl.label.update:
+          id: slot4_percent
+          text: !lambda |-
+            static char buf[12];
+            if (std::isnan(x)) return "--";
+            snprintf(buf, sizeof(buf), "%.0f %%", x);
+            return buf;
+      - lvgl.bar.update:
+          id: slot4_bar
+          value: !lambda 'return std::isnan(x) ? 0 : (int) x;'
+
 
 binary_sensor:
 
@@ -155,6 +271,98 @@ text_sensor:
             if (x == "idle") return "Bezczynny";
             if (x == "error") return "Błąd";
             return x.c_str();
+
+  # AMS slot 1: filament name
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_1_name
+    id: ams_slot_1_name
+    on_value:
+      - lvgl.label.update:
+          id: slot1_name
+          text: !lambda |-
+            if (x.empty() || x == "unknown" || x == "unavailable") return "Brak szpuli";
+            return x.c_str();
+
+  # AMS slot 1: filament colour (hex without #) -> colour dot
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_1_color
+    id: ams_slot_1_color
+    on_value:
+      - lvgl.widget.update:
+          id: slot1_swatch
+          bg_color: !lambda |-
+            uint32_t c = 0x404040;
+            if (x.size() == 6) c = (uint32_t) strtoul(x.c_str(), nullptr, 16);
+            return lv_color_hex(c);
+
+  # AMS slot 2: filament name
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_2_name
+    id: ams_slot_2_name
+    on_value:
+      - lvgl.label.update:
+          id: slot2_name
+          text: !lambda |-
+            if (x.empty() || x == "unknown" || x == "unavailable") return "Brak szpuli";
+            return x.c_str();
+
+  # AMS slot 2: filament colour (hex without #) -> colour dot
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_2_color
+    id: ams_slot_2_color
+    on_value:
+      - lvgl.widget.update:
+          id: slot2_swatch
+          bg_color: !lambda |-
+            uint32_t c = 0x404040;
+            if (x.size() == 6) c = (uint32_t) strtoul(x.c_str(), nullptr, 16);
+            return lv_color_hex(c);
+
+  # AMS slot 3: filament name
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_3_name
+    id: ams_slot_3_name
+    on_value:
+      - lvgl.label.update:
+          id: slot3_name
+          text: !lambda |-
+            if (x.empty() || x == "unknown" || x == "unavailable") return "Brak szpuli";
+            return x.c_str();
+
+  # AMS slot 3: filament colour (hex without #) -> colour dot
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_3_color
+    id: ams_slot_3_color
+    on_value:
+      - lvgl.widget.update:
+          id: slot3_swatch
+          bg_color: !lambda |-
+            uint32_t c = 0x404040;
+            if (x.size() == 6) c = (uint32_t) strtoul(x.c_str(), nullptr, 16);
+            return lv_color_hex(c);
+
+  # AMS slot 4: filament name
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_4_name
+    id: ams_slot_4_name
+    on_value:
+      - lvgl.label.update:
+          id: slot4_name
+          text: !lambda |-
+            if (x.empty() || x == "unknown" || x == "unavailable") return "Brak szpuli";
+            return x.c_str();
+
+  # AMS slot 4: filament colour (hex without #) -> colour dot
+  - platform: homeassistant
+    entity_id: sensor.ams_slot_4_color
+    id: ams_slot_4_color
+    on_value:
+      - lvgl.widget.update:
+          id: slot4_swatch
+          bg_color: !lambda |-
+            uint32_t c = 0x404040;
+            if (x.size() == 6) c = (uint32_t) strtoul(x.c_str(), nullptr, 16);
+            return lv_color_hex(c);
 
 
 script:
