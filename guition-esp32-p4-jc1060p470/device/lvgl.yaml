@@ -198,14 +198,22 @@ lvgl:
                   align: bottom_left
                   text: "Powietrze"
 
-        # Empty slot (starts a new column)
-        - obj:
+        # Open filament page (AMS slots)
+        - button:
+            id: filament_open_button
             height: $button_height
             width: $button_width
-            bg_opa: TRANSP
-            border_width: 0
-            pad_all: 0
-            clickable: false
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $filament
+              - label:
+                  align: bottom_left
+                  text: "Filament"
+            on_click:
+              - lvgl.page.show: filament_page
 
         # ---------- Column 3: vacuum ----------
 
@@ -781,4 +789,309 @@ lvgl:
               - script.execute:
                   id: dismiss_notification
                   idx: 4
+
+    - id: filament_page
+      bg_color: Black
+      bg_opa: cover
+      pad_all: 0
+      scrollable: false
+      widgets:
+
+        # AMS slot 1
+        - button:
+            x: 5
+            y: 42
+            width: 240
+            height: 380
+            clickable: false
+            styles: control
+            widgets:
+              - label:
+                  align: top_left
+                  text: "Slot 1"
+              - obj:
+                  id: slot1_swatch
+                  align: top_right
+                  width: 40
+                  height: 40
+                  radius: 20
+                  bg_color: 0x404040
+                  bg_opa: cover
+                  border_width: 2
+                  border_color: 0x909090
+                  pad_all: 0
+                  clickable: false
+              - obj:
+                  x: 0
+                  y: 70
+                  height: SIZE_CONTENT
+                  width: SIZE_CONTENT
+                  clickable: false
+                  layout:
+                    type: flex
+                    flex_flow: row
+                    flex_align_cross: end
+                  bg_opa: TRANSP
+                  border_width: 0
+                  pad_all: 0
+                  widgets:
+                    - label:
+                        text_font: statistics_font
+                        text_color: $button_text_color
+                        id: slot1_grams
+                        text: "--"
+                    - label:
+                        text_font: label_font
+                        text_color: $button_text_color
+                        text: "g"
+                        pad_bottom: 6
+                        pad_left: 4
+              - label:
+                  id: slot1_percent
+                  x: 0
+                  y: 140
+                  text: "--"
+              - bar:
+                  id: slot1_bar
+                  x: 0
+                  y: 178
+                  width: 210
+                  height: 14
+                  min_value: 0
+                  max_value: 100
+                  value: 0
+              - label:
+                  id: slot1_name
+                  align: bottom_left
+                  width: 210
+                  long_mode: WRAP
+                  text: "Brak szpuli"
+
+        # AMS slot 2
+        - button:
+            x: 255
+            y: 42
+            width: 240
+            height: 380
+            clickable: false
+            styles: control
+            widgets:
+              - label:
+                  align: top_left
+                  text: "Slot 2"
+              - obj:
+                  id: slot2_swatch
+                  align: top_right
+                  width: 40
+                  height: 40
+                  radius: 20
+                  bg_color: 0x404040
+                  bg_opa: cover
+                  border_width: 2
+                  border_color: 0x909090
+                  pad_all: 0
+                  clickable: false
+              - obj:
+                  x: 0
+                  y: 70
+                  height: SIZE_CONTENT
+                  width: SIZE_CONTENT
+                  clickable: false
+                  layout:
+                    type: flex
+                    flex_flow: row
+                    flex_align_cross: end
+                  bg_opa: TRANSP
+                  border_width: 0
+                  pad_all: 0
+                  widgets:
+                    - label:
+                        text_font: statistics_font
+                        text_color: $button_text_color
+                        id: slot2_grams
+                        text: "--"
+                    - label:
+                        text_font: label_font
+                        text_color: $button_text_color
+                        text: "g"
+                        pad_bottom: 6
+                        pad_left: 4
+              - label:
+                  id: slot2_percent
+                  x: 0
+                  y: 140
+                  text: "--"
+              - bar:
+                  id: slot2_bar
+                  x: 0
+                  y: 178
+                  width: 210
+                  height: 14
+                  min_value: 0
+                  max_value: 100
+                  value: 0
+              - label:
+                  id: slot2_name
+                  align: bottom_left
+                  width: 210
+                  long_mode: WRAP
+                  text: "Brak szpuli"
+
+        # AMS slot 3
+        - button:
+            x: 505
+            y: 42
+            width: 240
+            height: 380
+            clickable: false
+            styles: control
+            widgets:
+              - label:
+                  align: top_left
+                  text: "Slot 3"
+              - obj:
+                  id: slot3_swatch
+                  align: top_right
+                  width: 40
+                  height: 40
+                  radius: 20
+                  bg_color: 0x404040
+                  bg_opa: cover
+                  border_width: 2
+                  border_color: 0x909090
+                  pad_all: 0
+                  clickable: false
+              - obj:
+                  x: 0
+                  y: 70
+                  height: SIZE_CONTENT
+                  width: SIZE_CONTENT
+                  clickable: false
+                  layout:
+                    type: flex
+                    flex_flow: row
+                    flex_align_cross: end
+                  bg_opa: TRANSP
+                  border_width: 0
+                  pad_all: 0
+                  widgets:
+                    - label:
+                        text_font: statistics_font
+                        text_color: $button_text_color
+                        id: slot3_grams
+                        text: "--"
+                    - label:
+                        text_font: label_font
+                        text_color: $button_text_color
+                        text: "g"
+                        pad_bottom: 6
+                        pad_left: 4
+              - label:
+                  id: slot3_percent
+                  x: 0
+                  y: 140
+                  text: "--"
+              - bar:
+                  id: slot3_bar
+                  x: 0
+                  y: 178
+                  width: 210
+                  height: 14
+                  min_value: 0
+                  max_value: 100
+                  value: 0
+              - label:
+                  id: slot3_name
+                  align: bottom_left
+                  width: 210
+                  long_mode: WRAP
+                  text: "Brak szpuli"
+
+        # AMS slot 4
+        - button:
+            x: 755
+            y: 42
+            width: 240
+            height: 380
+            clickable: false
+            styles: control
+            widgets:
+              - label:
+                  align: top_left
+                  text: "Slot 4"
+              - obj:
+                  id: slot4_swatch
+                  align: top_right
+                  width: 40
+                  height: 40
+                  radius: 20
+                  bg_color: 0x404040
+                  bg_opa: cover
+                  border_width: 2
+                  border_color: 0x909090
+                  pad_all: 0
+                  clickable: false
+              - obj:
+                  x: 0
+                  y: 70
+                  height: SIZE_CONTENT
+                  width: SIZE_CONTENT
+                  clickable: false
+                  layout:
+                    type: flex
+                    flex_flow: row
+                    flex_align_cross: end
+                  bg_opa: TRANSP
+                  border_width: 0
+                  pad_all: 0
+                  widgets:
+                    - label:
+                        text_font: statistics_font
+                        text_color: $button_text_color
+                        id: slot4_grams
+                        text: "--"
+                    - label:
+                        text_font: label_font
+                        text_color: $button_text_color
+                        text: "g"
+                        pad_bottom: 6
+                        pad_left: 4
+              - label:
+                  id: slot4_percent
+                  x: 0
+                  y: 140
+                  text: "--"
+              - bar:
+                  id: slot4_bar
+                  x: 0
+                  y: 178
+                  width: 210
+                  height: 14
+                  min_value: 0
+                  max_value: 100
+                  value: 0
+              - label:
+                  id: slot4_name
+                  align: bottom_left
+                  width: 210
+                  long_mode: WRAP
+                  text: "Brak szpuli"
+
+        # Back
+        - button:
+            x: 5
+            y: 462
+            height: $button_height
+            width: $button_width
+            styles: control
+            widgets:
+              - label:
+                  text_font: $icon_font
+                  align: top_left
+                  text: $icon_back
+              - label:
+                  align: bottom_left
+                  text: "Wstecz"
+            on_click:
+              - lvgl.page.show: main_page
 
