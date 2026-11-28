@@ -13,6 +13,20 @@ lvgl:
   top_layer:
     widgets:
     
+      # Double-tap the top bar to put the screen to sleep
+      - obj:
+          x: 0
+          y: 0
+          width: 100%
+          height: 42
+          bg_opa: TRANSP
+          border_width: 0
+          pad_all: 0
+          scrollable: false
+          clickable: true
+          on_double_click:
+            - script.execute: screen_sleep
+
       # Clock
       - label:
           text: "--:--"
